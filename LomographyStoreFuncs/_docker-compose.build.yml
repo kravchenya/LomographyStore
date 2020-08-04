@@ -1,0 +1,20 @@
+version: '2'
+
+services:
+  build:
+    image: mcr.microsoft.com/dotnet/core/sdk:3.1
+    volumes:
+      - .:/src
+    working_dir: /src
+    command: /bin/bash -c "dotnet restore  && dotnet publish -c release -o ./obj/Docker/publish"
+
+    version: '3.4'
+
+    services:
+      lomographystorefuncs:
+        image: lomographystorefuncs
+        build:
+          context: .
+          dockerfile: Dockerfile
+        ports:
+          - 8084:80

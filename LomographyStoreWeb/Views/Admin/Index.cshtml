@@ -1,0 +1,53 @@
+﻿@model LomographyStoreWeb.Models.PhotoItem
+
+@{
+    ViewData["Title"] = "Create New Product";
+}
+
+<section class="section">
+    <h2>Add a new product</h2>
+    <p class="text-info text-center">@ViewData["ProgressMessage"]</p>
+    <p class="text-danger text-center">@ViewData["ErrorMessage"]</p>
+
+    <div class="product-add">
+        <form asp-action="AddPhoto" asp-controller="Admin">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" required />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Description" class="control-label"></label>
+                <input asp-for="Description" class="form-control" required />
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+             <div class="form-group">
+                <label asp-for="Camera" class="control-label"></label>
+                <input asp-for="Camera" class="form-control" required/>
+                <span asp-validation-for="Camera" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Film" class="control-label"></label>
+                <input asp-for="Film" class="form-control" />
+                <span asp-validation-for="Film" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn-primary" />
+            </div>
+        </form>
+
+        <form asp-action="NewImage" asp-controller="Admin" enctype="multipart/form-data" method="post">
+            <input type="hidden" name="imageId" value="@ViewData["NewPhotoId"]" />
+            <input type="hidden" name="camera" value="@ViewData["Camera"]" />
+            <div class="form-group">
+                <label for="ImageFile" class="control-label">Photo Image:</label>
+                <input type="file" id="imageFile" name="imageFile" class="form-control" required />
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Add Photo" class="btn-primary" />
+            </div>
+        </form>
+    </div>
+</section>

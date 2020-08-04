@@ -1,0 +1,1177 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "sites_lomostoreapi_name": {
+            "defaultValue": "lomostoreapi",
+            "type": "String"
+        },
+        "sites_lomostoreweb_name": {
+            "defaultValue": "lomostoreweb",
+            "type": "String"
+        },
+        "connections_azurefile_name": {
+            "defaultValue": "azurefile",
+            "type": "String"
+        },
+        "sites_lomostorefuncapp_name": {
+            "defaultValue": "lomostorefuncapp",
+            "type": "String"
+        },
+        "connections_azurequeues_name": {
+            "defaultValue": "azurequeues",
+            "type": "String"
+        },
+        "workflows_lomographystorelogic_name": {
+            "defaultValue": "lomographystorelogic",
+            "type": "String"
+        },
+        "serverfarms_lomostoreserviceplan_name": {
+            "defaultValue": "lomostoreserviceplan",
+            "type": "String"
+        },
+        "databaseAccounts_lomostore_cosmosdb_name": {
+            "defaultValue": "lomostore-cosmosdb",
+            "type": "String"
+        },
+        "storageAccounts_lomostorestorageaccount_name": {
+            "defaultValue": "lomostorestorageaccount",
+            "type": "String"
+        },
+		"dockerregistry_username": {
+            "defaultValue": "lomostorecontainers",
+            "type": "String"
+        },
+		"dockerregistry_password": {
+            "defaultValue": "your_passward_here",
+            "type": "String"
+        },
+		"dockerregistry_url": {
+            "defaultValue": "https://your_dockerrepo_here.azurecr.io",
+            "type": "String"
+        },
+        "dockerregistry_domane": {
+            "defaultValue": "your_dockerrepo_here.azurecr.io",
+            "type": "String"
+        },
+        "dockerimage_lomostoreapi": {
+            "defaultValue": "lomographystoreapi",
+            "type": "String"
+        },
+        "dockerimage_lomostorefuncapp": {
+            "defaultValue": "lomographystoreapi",
+            "type": "String"
+        },
+        "dockerimage_lomostoreweb": {
+            "defaultValue": "lomographystoreweb",
+            "type": "String"
+        },
+        "az_blob": {
+            "defaultValue": "images",
+            "type": "String"
+        },
+         "az_partition": {
+            "defaultValue": "history",
+            "type": "String"
+        },
+         "az_queue": {
+            "defaultValue": "orders",
+            "type": "String"
+        },
+        "az_table": {
+            "defaultValue": "orderhistory",
+            "type": "String"
+        },
+        "cosmosdb_dbcollection": {
+            "defaultValue": "Products",
+            "type": "String"
+        },
+         "cosmosdb_dbname": {
+            "defaultValue": "ProductsDb",
+            "type": "String"
+        },
+         "cosmosdb_dbpartitionkey": {
+            "defaultValue": "Camera",
+            "type": "String"
+        },
+         "webapirouteoptions_cameraroute": {
+            "defaultValue": "camera",
+            "type": "String"
+        },"webapirouteoptions_imageroute": {
+            "defaultValue": "image",
+            "type": "String"
+        },
+        "webapirouteoptions_orderroute": {
+            "defaultValue": "order",
+            "type": "String"
+        },
+        "webapirouteoptions_photoitemroute": {
+            "defaultValue": "photoitem",
+            "type": "String"
+        },
+        "webapirouteoptions_productroute": {
+            "defaultValue": "product",
+            "type": "String"
+        }
+    },
+    "variables": {
+		"storageAccounts_lomostorestorageaccount_id": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_lomostorestorageaccount_name'))]",
+		"databaseAccounts_lomostore_cosmosdb_id": "[resourceId('Microsoft.DocumentDB/databaseAccounts',parameters('databaseAccounts_lomostore_cosmosdb_name'))]",
+		"subscription_id": "[subscription().subscriptionId]"
+	},
+    "resources": [
+        {
+            "type": "Microsoft.DocumentDB/databaseAccounts",
+            "apiVersion": "2020-04-01",
+            "name": "[parameters('databaseAccounts_lomostore_cosmosdb_name')]",
+            "location": "West Europe",
+            "tags": {
+                "defaultExperience": "Core (SQL)",
+                "hidden-cosmos-mmspecial": "",
+                "CosmosAccountType": "Non-Production"
+            },
+            "kind": "GlobalDocumentDB",
+            "properties": {
+                "publicNetworkAccess": "Enabled",
+                "enableAutomaticFailover": false,
+                "enableMultipleWriteLocations": false,
+                "isVirtualNetworkFilterEnabled": false,
+                "virtualNetworkRules": [],
+                "disableKeyBasedMetadataWriteAccess": false,
+                "enableFreeTier": false,
+                "enableAnalyticalStorage": false,
+                "databaseAccountOfferType": "Standard",
+                "consistencyPolicy": {
+                    "defaultConsistencyLevel": "Session",
+                    "maxIntervalInSeconds": 5,
+                    "maxStalenessPrefix": 100
+                },
+                "locations": [
+                    {
+                        "locationName": "West Europe",
+                        "provisioningState": "Succeeded",
+                        "failoverPriority": 0,
+                        "isZoneRedundant": false
+                    }
+                ],
+                "capabilities": [],
+                "ipRules": []
+            }
+        },
+        {
+            "type": "microsoft.insights/components",
+            "apiVersion": "2018-05-01-preview",
+            "name": "[parameters('sites_lomostoreapi_name')]",
+            "location": "westeurope",
+            "kind": "web",
+            "properties": {
+                "Application_Type": "web",
+                "RetentionInDays": 90,
+                "publicNetworkAccessForIngestion": "Enabled",
+                "publicNetworkAccessForQuery": "Enabled"
+            }
+        },
+        {
+            "type": "microsoft.insights/components",
+            "apiVersion": "2018-05-01-preview",
+            "name": "[parameters('sites_lomostorefuncapp_name')]",
+            "location": "westeurope",
+            "kind": "web",
+            "properties": {
+                "Application_Type": "web",
+                "Request_Source": "IbizaWebAppExtensionCreate",
+                "RetentionInDays": 90,
+                "publicNetworkAccessForIngestion": "Enabled",
+                "publicNetworkAccessForQuery": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2019-06-01",
+            "name": "[parameters('storageAccounts_lomostorestorageaccount_name')]",
+            "location": "westeurope",
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "kind": "Storage",
+            "properties": {
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "virtualNetworkRules": [],
+                    "ipRules": [],
+                    "defaultAction": "Allow"
+                },
+                "supportsHttpsTrafficOnly": true,
+                "encryption": {
+                    "services": {
+                        "file": {
+                            "keyType": "Account",
+                            "enabled": true
+                        },
+                        "blob": {
+                            "keyType": "Account",
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Web/connections",
+            "apiVersion": "2016-06-01",
+            "name": "[parameters('connections_azurefile_name')]",
+            "location": "westeurope",
+            "properties": {
+                "displayName": "lomostorefile",
+                "customParameterValues": {},
+                "api": {
+                    "id": "[concat('/subscriptions/',variables('subscription_id') ,'/providers/Microsoft.Web/locations/westeurope/managedApis/', parameters('connections_azurefile_name'))]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Web/connections",
+            "apiVersion": "2016-06-01",
+            "name": "[parameters('connections_azurequeues_name')]",
+            "location": "westeurope",
+            "properties": {
+                "displayName": "lomostorestorage",
+                "customParameterValues": {},
+                "api": {
+                    "id": "[concat('/subscriptions/',variables('subscription_id') ,'/providers/Microsoft.Web/locations/westeurope/managedApis/', parameters('connections_azurequeues_name'))]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2018-02-01",
+            "name": "[parameters('serverfarms_lomostoreserviceplan_name')]",
+            "location": "West Europe",
+            "sku": {
+                "name": "B1",
+                "tier": "Basic",
+                "size": "B1",
+                "family": "B",
+                "capacity": 1
+            },
+            "kind": "linux",
+            "properties": {
+                "perSiteScaling": false,
+                "maximumElasticWorkerCount": 1,
+                "isSpot": false,
+                "freeOfferExpirationTime": "2020-09-02T12:16:18.1233333",
+                "reserved": true,
+                "isXenon": false,
+                "hyperV": false,
+                "targetWorkerCount": 0,
+                "targetWorkerSizeId": 0
+            }
+        },
+        {
+            "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases",
+            "apiVersion": "2020-04-01",
+            "name": "[concat(parameters('databaseAccounts_lomostore_cosmosdb_name'),  '/', parameters('cosmosdb_dbname'))]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_lomostore_cosmosdb_name'))]"
+            ],
+            "properties": {
+                "resource": {
+                    "id": "[parameters('cosmosdb_dbname')]"
+                },
+                "options": {
+					"throughput": 400
+				}
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(parameters('storageAccounts_lomostorestorageaccount_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_lomostorestorageaccount_name'))]"
+            ],
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                },
+                "deleteRetentionPolicy": {
+                    "enabled": false
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/fileServices",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(parameters('storageAccounts_lomostorestorageaccount_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_lomostorestorageaccount_name'))]"
+            ],
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2018-11-01",
+            "name": "[parameters('sites_lomostoreapi_name')]",
+            "location": "West Europe",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_lomostoreserviceplan_name'))]"
+            ],
+            "kind": "app,linux,container",
+            "properties": {
+                "enabled": true,
+                "hostNameSslStates": [
+                    {
+                        "name": "[concat(parameters('sites_lomostoreapi_name'), '.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "hostType": "Standard"
+                    },
+                    {
+                        "name": "[concat(parameters('sites_lomostoreapi_name'), '.scm.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "hostType": "Repository"
+                    }
+                ],
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_lomostoreserviceplan_name'))]",
+                "reserved": true,
+                "isXenon": false,
+                "hyperV": false,
+                "siteConfig": {
+					"appSettings": [
+                        {
+							"name": "AZ_Blob",
+							"value": "[parameters('az_blob')]"
+						},
+                        {
+							"name": "AZ_Partiton",
+							"value": "[parameters('az_partition')]"
+						},
+                        {
+							"name": "AZ_Queue",
+							"value": "[parameters('az_queue')]"
+						},
+                        {
+                            "name": "AZ_Storage",
+                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', parameters('storageAccounts_lomostorestorageaccount_name'), ';AccountKey=', listKeys(variables('storageAccounts_lomostorestorageaccount_id'), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]"
+						},
+                        {
+							"name": "AZ_Table",
+							"value": "[parameters('az_table')]"
+						},
+                        {
+							"name": "CosmosDB__DBCollection",
+							"value": "[parameters('cosmosDB_dbcollection')]"
+						},
+                        {
+							"name": "CosmosDB__DBKey",
+                            "value": "[listKeys(variables('databaseAccounts_lomostore_cosmosdb_id'), '2020-04-01').primaryMasterKey]"
+						},  
+                        {
+							"name": "CosmosDB__DBName",
+							"value": "[parameters('cosmosdb_dbname')]"
+						},
+                        {
+							"name": "CosmosDB__DBPartitionKey",
+							"value": "[parameters('cosmosdb_dbpartitionkey')]"
+						},
+                        {
+							"name": "CosmosDB__DBUri",
+                            "value": "[reference(variables('databaseAccounts_lomostore_cosmosdb_id'), '2020-04-01').documentEndpoint]"
+						},                      
+						{
+							"name": "DOCKER_REGISTRY_SERVER_URL",
+							"value": "[parameters('dockerregistry_url')]"
+						},
+						{
+							"name": "DOCKER_REGISTRY_SERVER_USERNAME",
+							"value": "[parameters('dockerregistry_username')]"
+						},
+						{
+							"name": "DOCKER_REGISTRY_SERVER_PASSWORD",
+							"value": "[parameters('dockerregistry_password')]"
+						},
+						{
+							"name": "WEBSITES_ENABLE_APP_SERVICE_STORAGE",
+							"value": "false"
+						}
+					],
+					"linuxFxVersion": "[concat('DOCKER|', parameters('dockerregistry_domane'), '/', parameters('dockerimage_lomostoreapi'), ':latest')]"
+				},
+                "scmSiteAlsoStopped": false,
+                "clientAffinityEnabled": false,
+                "clientCertEnabled": false,
+                "hostNamesDisabled": false,
+                "containerSize": 0,
+                "dailyMemoryTimeQuota": 0,
+                "httpsOnly": false,
+                "redundancyMode": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2018-11-01",
+            "name": "[parameters('sites_lomostorefuncapp_name')]",
+            "location": "West Europe",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_lomostoreserviceplan_name'))]"
+            ],
+            "kind": "functionapp,linux,container",
+            "properties": {
+                "enabled": true,
+                "hostNameSslStates": [
+                    {
+                        "name": "[concat(parameters('sites_lomostorefuncapp_name'), '.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "hostType": "Standard"
+                    },
+                    {
+                        "name": "[concat(parameters('sites_lomostorefuncapp_name'), '.scm.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "hostType": "Repository"
+                    }
+                ],
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_lomostoreserviceplan_name'))]",
+                "reserved": true,
+                "isXenon": false,
+                "hyperV": false,
+                "siteConfig": {
+					"appSettings": [
+							{
+								"name": "AzureWebJobsStorage",
+								"value": "[concat('DefaultEndpointsProtocol=https;AccountName=', parameters('storageAccounts_lomostorestorageaccount_name'), ';AccountKey=', listKeys(variables('storageAccounts_lomostorestorageaccount_id'), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]"
+							},
+							{
+								"name": "DOCKER_REGISTRY_SERVER_URL",
+								"value": "[parameters('dockerregistry_url')]"
+							},
+							{
+								"name": "DOCKER_REGISTRY_SERVER_USERNAME",
+								"value": "[parameters('dockerregistry_username')]"
+							},
+							{
+								"name": "DOCKER_REGISTRY_SERVER_PASSWORD",
+								"value": "[parameters('dockerregistry_password')]"
+							},
+							{
+								"name": "FUNCTIONS_EXTENSION_VERSION",
+								"value": "~3"
+							},
+							{
+								"name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+								"value": "[concat('DefaultEndpointsProtocol=https;AccountName=', parameters('storageAccounts_lomostorestorageaccount_name'), ';AccountKey=', listKeys(variables('storageAccounts_lomostorestorageaccount_id'), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]"
+							},
+							{
+								"name": "WEBSITE_CONTENTSHARE",
+								"value": "lomostorefuncad03"
+							},
+							{
+								"name": "WEBSITES_ENABLE_APP_SERVICE_STORAGE",
+								"value": "false"
+							}
+						],
+                    "linuxFxVersion": "[concat('DOCKER|', parameters('dockerregistry_domane'), '/' , parameters('dockerimage_lomostorefuncapp'), ':latest')]"
+				},
+                "scmSiteAlsoStopped": false,
+                "clientAffinityEnabled": false,
+                "clientCertEnabled": false,
+                "hostNamesDisabled": false,
+                "containerSize": 1536,
+                "dailyMemoryTimeQuota": 0,
+                "httpsOnly": false,
+                "redundancyMode": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2018-11-01",
+            "name": "[parameters('sites_lomostoreweb_name')]",
+            "location": "West Europe",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_lomostoreserviceplan_name'))]"
+            ],
+            "kind": "app,linux,container",
+            "properties": {
+                "enabled": true,
+                "hostNameSslStates": [
+                    {
+                        "name": "[concat(parameters('sites_lomostoreweb_name'), '.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "hostType": "Standard"
+                    },
+                    {
+                        "name": "[concat(parameters('sites_lomostoreweb_name'), '.scm.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "hostType": "Repository"
+                    }
+                ],
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_lomostoreserviceplan_name'))]",
+                "reserved": true,
+                "isXenon": false,
+                "hyperV": false,
+                "siteConfig": {
+					"appSettings": [
+                        {
+							"name": "APIHost",
+                            "value": "[concat('https://', parameters('sites_lomostoreapi_name') , '.azurewebsites.net/api/')]"
+                        },
+						{
+							"name": "AzureWebJobsStorage",
+							"value": "[concat('DefaultEndpointsProtocol=https;AccountName=', parameters('storageAccounts_lomostorestorageaccount_name'), ';AccountKey=', listKeys(variables('storageAccounts_lomostorestorageaccount_id'), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value)]"
+						},
+						{
+							"name": "DOCKER_REGISTRY_SERVER_URL",
+							"value": "[parameters('dockerregistry_url')]"
+						},
+						{
+							"name": "DOCKER_REGISTRY_SERVER_USERNAME",
+							"value": "[parameters('dockerregistry_username')]"
+						},
+						{
+							"name": "DOCKER_REGISTRY_SERVER_PASSWORD",
+							"value": "[parameters('dockerregistry_password')]"
+						},
+						{
+							"name": "WebApiRouteOptions__CameraRoute",
+							"value": "[parameters('webapirouteoptions_cameraroute')]"
+						},
+                        {
+							"name": "WebApiRouteOptions__ImageRoute",
+							"value": "[parameters('webapirouteoptions_imageroute')]"
+						},
+                        {
+							"name": "WebApiRouteOptions__OrderRoute",
+							"value": "[parameters('webapirouteoptions_orderroute')]"
+						},
+                        {
+							"name": "WebApiRouteOptions__PhotoItemRoute",
+							"value": "[parameters('webapirouteoptions_photoitemroute')]"
+						}, 
+                        {
+							"name": "WebApiRouteOptions__ProductRoute",
+							"value": "[parameters('webapirouteoptions_productroute')]"
+						},
+						{
+							"name": "WEBSITES_ENABLE_APP_SERVICE_STORAGE",
+							"value": "false"
+						}
+					],
+                    "linuxFxVersion": "[concat('DOCKER|', parameters('dockerregistry_domane'), '/' , parameters('dockerimage_lomostoreweb'), ':latest')]"
+				},
+                "scmSiteAlsoStopped": false,
+                "clientAffinityEnabled": false,
+                "clientCertEnabled": false,
+                "hostNamesDisabled": false,
+                "containerSize": 0,
+                "dailyMemoryTimeQuota": 0,
+                "httpsOnly": false,
+                "redundancyMode": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/config",
+            "apiVersion": "2018-11-01",
+            "name": "[concat(parameters('sites_lomostoreapi_name'), '/web')]",
+            "location": "West Europe",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_lomostoreapi_name'))]"
+            ],
+            "properties": {
+                "numberOfWorkers": 1,
+                "defaultDocuments": [
+                    "Default.htm",
+                    "Default.html",
+                    "Default.asp",
+                    "index.htm",
+                    "index.html",
+                    "iisstart.htm",
+                    "default.aspx",
+                    "index.php",
+                    "hostingstart.html"
+                ],
+                "netFrameworkVersion": "v4.0",
+                "linuxFxVersion": "[concat('DOCKER|', parameters('dockerregistry_domane'), '/' , parameters('dockerimage_lomostoreapi'), ':latest')]",
+                "requestTracingEnabled": false,
+                "remoteDebuggingEnabled": false,
+                "remoteDebuggingVersion": "VS2019",
+                "httpLoggingEnabled": false,
+                "logsDirectorySizeLimit": 35,
+                "detailedErrorLoggingEnabled": false,
+                "publishingUsername": "$lomostoreapi",
+                "azureStorageAccounts": {},
+                "scmType": "None",
+                "use32BitWorkerProcess": true,
+                "webSocketsEnabled": false,
+                "alwaysOn": false,
+                "managedPipelineMode": "Integrated",
+                "virtualApplications": [
+                    {
+                        "virtualPath": "/",
+                        "physicalPath": "site\\wwwroot",
+                        "preloadEnabled": false
+                    }
+                ],
+                "loadBalancing": "LeastRequests",
+                "experiments": {
+                    "rampUpRules": []
+                },
+                "autoHealEnabled": false,
+                "localMySqlEnabled": false,
+                "ipSecurityRestrictions": [
+                    {
+                        "ipAddress": "Any",
+                        "action": "Allow",
+                        "priority": 1,
+                        "name": "Allow all",
+                        "description": "Allow all access"
+                    }
+                ],
+                "scmIpSecurityRestrictions": [
+                    {
+                        "ipAddress": "Any",
+                        "action": "Allow",
+                        "priority": 1,
+                        "name": "Allow all",
+                        "description": "Allow all access"
+                    }
+                ],
+                "scmIpSecurityRestrictionsUseMain": false,
+                "http20Enabled": false,
+                "minTlsVersion": "1.2",
+                "ftpsState": "AllAllowed",
+                "reservedInstanceCount": 0
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/config",
+            "apiVersion": "2018-11-01",
+            "name": "[concat(parameters('sites_lomostorefuncapp_name'), '/web')]",
+            "location": "West Europe",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_lomostorefuncapp_name'))]"
+            ],
+            "properties": {
+                "numberOfWorkers": 1,
+                "defaultDocuments": [
+                    "Default.htm",
+                    "Default.html",
+                    "Default.asp",
+                    "index.htm",
+                    "index.html",
+                    "iisstart.htm",
+                    "default.aspx",
+                    "index.php"
+                ],
+                "netFrameworkVersion": "v4.0",
+                "linuxFxVersion": "[concat('DOCKER|', parameters('dockerregistry_domane'), '/' , parameters('dockerimage_lomostorefuncapp'), ':latest')]",
+                "requestTracingEnabled": false,
+                "remoteDebuggingEnabled": false,
+                "remoteDebuggingVersion": "VS2019",
+                "httpLoggingEnabled": false,
+                "logsDirectorySizeLimit": 35,
+                "detailedErrorLoggingEnabled": false,
+                "publishingUsername": "$lomostorefuncapp",
+                "azureStorageAccounts": {},
+                "scmType": "None",
+                "use32BitWorkerProcess": false,
+                "webSocketsEnabled": false,
+                "alwaysOn": false,
+                "managedPipelineMode": "Integrated",
+                "virtualApplications": [
+                    {
+                        "virtualPath": "/",
+                        "physicalPath": "site\\wwwroot",
+                        "preloadEnabled": false
+                    }
+                ],
+                "loadBalancing": "LeastRequests",
+                "experiments": {
+                    "rampUpRules": []
+                },
+                "autoHealEnabled": false,
+                "cors": {
+                    "allowedOrigins": [
+                        "https://functions.azure.com",
+                        "https://functions-staging.azure.com",
+                        "https://functions-next.azure.com"
+                    ],
+                    "supportCredentials": false
+                },
+                "localMySqlEnabled": false,
+                "ipSecurityRestrictions": [
+                    {
+                        "ipAddress": "Any",
+                        "action": "Allow",
+                        "priority": 1,
+                        "name": "Allow all",
+                        "description": "Allow all access"
+                    }
+                ],
+                "scmIpSecurityRestrictions": [
+                    {
+                        "ipAddress": "Any",
+                        "action": "Allow",
+                        "priority": 1,
+                        "name": "Allow all",
+                        "description": "Allow all access"
+                    }
+                ],
+                "scmIpSecurityRestrictionsUseMain": false,
+                "http20Enabled": false,
+                "minTlsVersion": "1.2",
+                "ftpsState": "AllAllowed",
+                "reservedInstanceCount": 0
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/config",
+            "apiVersion": "2018-11-01",
+            "name": "[concat(parameters('sites_lomostoreweb_name'), '/web')]",
+            "location": "West Europe",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_lomostoreweb_name'))]"
+            ],
+            "properties": {
+                "numberOfWorkers": 1,
+                "defaultDocuments": [
+                    "Default.htm",
+                    "Default.html",
+                    "Default.asp",
+                    "index.htm",
+                    "index.html",
+                    "iisstart.htm",
+                    "default.aspx",
+                    "index.php",
+                    "hostingstart.html"
+                ],
+                "netFrameworkVersion": "v4.0",
+                "linuxFxVersion": "[concat('DOCKER|', parameters('dockerregistry_domane'), '/' , parameters('dockerimage_lomostoreweb'), ':latest')]",
+                "requestTracingEnabled": false,
+                "remoteDebuggingEnabled": false,
+                "remoteDebuggingVersion": "VS2019",
+                "httpLoggingEnabled": false,
+                "logsDirectorySizeLimit": 35,
+                "detailedErrorLoggingEnabled": false,
+                "publishingUsername": "$lomostoreweb",
+                "azureStorageAccounts": {},
+                "scmType": "None",
+                "use32BitWorkerProcess": true,
+                "webSocketsEnabled": false,
+                "alwaysOn": false,
+                "managedPipelineMode": "Integrated",
+                "virtualApplications": [
+                    {
+                        "virtualPath": "/",
+                        "physicalPath": "site\\wwwroot",
+                        "preloadEnabled": false
+                    }
+                ],
+                "loadBalancing": "LeastRequests",
+                "experiments": {
+                    "rampUpRules": []
+                },
+                "autoHealEnabled": false,
+                "localMySqlEnabled": false,
+                "ipSecurityRestrictions": [
+                    {
+                        "ipAddress": "Any",
+                        "action": "Allow",
+                        "priority": 1,
+                        "name": "Allow all",
+                        "description": "Allow all access"
+                    }
+                ],
+                "scmIpSecurityRestrictions": [
+                    {
+                        "ipAddress": "Any",
+                        "action": "Allow",
+                        "priority": 1,
+                        "name": "Allow all",
+                        "description": "Allow all access"
+                    }
+                ],
+                "scmIpSecurityRestrictionsUseMain": false,
+                "http20Enabled": false,
+                "minTlsVersion": "1.2",
+                "ftpsState": "AllAllowed",
+                "reservedInstanceCount": 0
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/functions",
+            "apiVersion": "2018-11-01",
+            "name": "[concat(parameters('sites_lomostorefuncapp_name'), '/OrderFunction')]",
+            "location": "West Europe",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_lomostorefuncapp_name'))]"
+            ],
+            "properties": {
+                "script_root_path_href": "https://lomostorefuncapp.azurewebsites.net/admin/vfs/home/site/wwwroot/OrderFunction/",
+                "script_href": "https://lomostorefuncapp.azurewebsites.net/admin/vfs/home/site/wwwroot/bin/LomographyStoreFuncs.dll",
+                "config_href": "https://lomostorefuncapp.azurewebsites.net/admin/vfs/home/site/wwwroot/OrderFunction/function.json",
+                "href": "https://lomostorefuncapp.azurewebsites.net/admin/functions/OrderFunction",
+                "config": {}
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/hostNameBindings",
+            "apiVersion": "2018-11-01",
+            "name": "[concat(parameters('sites_lomostoreapi_name'), '/', parameters('sites_lomostoreapi_name'), '.azurewebsites.net')]",
+            "location": "West Europe",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_lomostoreapi_name'))]"
+            ],
+            "properties": {
+                "siteName": "lomostoreapi",
+                "hostNameType": "Verified"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/hostNameBindings",
+            "apiVersion": "2018-11-01",
+            "name": "[concat(parameters('sites_lomostorefuncapp_name'), '/', parameters('sites_lomostorefuncapp_name'), '.azurewebsites.net')]",
+            "location": "West Europe",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_lomostorefuncapp_name'))]"
+            ],
+            "properties": {
+                "siteName": "lomostorefuncapp",
+                "hostNameType": "Verified"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/hostNameBindings",
+            "apiVersion": "2018-11-01",
+            "name": "[concat(parameters('sites_lomostoreweb_name'), '/', parameters('sites_lomostoreweb_name'), '.azurewebsites.net')]",
+            "location": "West Europe",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_lomostoreweb_name'))]"
+            ],
+            "properties": {
+                "siteName": "lomostoreweb",
+                "hostNameType": "Verified"
+            }
+        },
+        {
+            "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+            "apiVersion": "2020-04-01",
+            "name": "[concat(parameters('databaseAccounts_lomostore_cosmosdb_name'), '/', parameters('cosmosdb_dbname'), '/', parameters('cosmosdb_dbcollection'))]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', parameters('databaseAccounts_lomostore_cosmosdb_name'), parameters('cosmosdb_dbname'))]",
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_lomostore_cosmosdb_name'))]"
+            ],
+            "properties": {
+                "resource": {
+                    "id": "Products",
+                    "indexingPolicy": {
+                        "indexingMode": "consistent",
+                        "automatic": true,
+                        "includedPaths": [
+                            {
+                                "path": "/*"
+                            }
+                        ],
+                        "excludedPaths": [
+                            {
+                                "path": "/\"_etag\"/?"
+                            }
+                        ]
+                    },
+                    "partitionKey": {
+                        "paths": [
+                            "/Camera"
+                        ],
+                        "kind": "Hash"
+                    },
+                    "uniqueKeyPolicy": {
+                        "uniqueKeys": []
+                    },
+                    "conflictResolutionPolicy": {
+                        "mode": "LastWriterWins",
+                        "conflictResolutionPath": "/_ts"
+                    }
+                },
+                "options": {}
+            }
+        },
+        {
+            "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/throughputSettings",
+            "apiVersion": "2020-04-01",
+            "name": "[concat(parameters('databaseAccounts_lomostore_cosmosdb_name'), '/', parameters('cosmosdb_dbname'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', parameters('databaseAccounts_lomostore_cosmosdb_name'), parameters('cosmosdb_dbname'))]",
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_lomostore_cosmosdb_name'))]"
+            ],
+            "properties": {
+                "resource": {
+                    "throughput": 400
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(parameters('storageAccounts_lomostorestorageaccount_name'), '/default/azure-webjobs-hosts')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_lomostorestorageaccount_name'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_lomostorestorageaccount_name'))]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(parameters('storageAccounts_lomostorestorageaccount_name'), '/default/azure-webjobs-secrets')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_lomostorestorageaccount_name'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_lomostorestorageaccount_name'))]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(parameters('storageAccounts_lomostorestorageaccount_name'), '/default/images')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', parameters('storageAccounts_lomostorestorageaccount_name'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_lomostorestorageaccount_name'))]"
+            ],
+            "properties": {
+                "publicAccess": "Blob"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(parameters('storageAccounts_lomostorestorageaccount_name'), '/default/lomostorefuncad03')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/fileServices', parameters('storageAccounts_lomostorestorageaccount_name'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_lomostorestorageaccount_name'))]"
+            ],
+            "properties": {
+                "shareQuota": 5120
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(parameters('storageAccounts_lomostorestorageaccount_name'), '/default/lomostorefuncappad03')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/fileServices', parameters('storageAccounts_lomostorestorageaccount_name'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_lomostorestorageaccount_name'))]"
+            ],
+            "properties": {
+                "shareQuota": 5120
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(parameters('storageAccounts_lomostorestorageaccount_name'), '/default/lomostoreorderfiles')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/fileServices', parameters('storageAccounts_lomostorestorageaccount_name'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_lomostorestorageaccount_name'))]"
+            ],
+            "properties": {
+                "shareQuota": 1
+            }
+        },
+        {
+            "type": "Microsoft.Logic/workflows",
+            "apiVersion": "2017-07-01",
+            "name": "[parameters('workflows_lomographystorelogic_name')]",
+            "location": "westeurope",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/functions', parameters('sites_lomostorefuncapp_name'), 'OrderFunction')]",
+                "[resourceId('Microsoft.Web/connections', parameters('connections_azurefile_name'))]",
+                "[resourceId('Microsoft.Web/connections', parameters('connections_azurequeues_name'))]"
+            ],
+            "properties": {
+                "state": "Disabled",
+                "definition": {
+                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "$connections": {
+                            "defaultValue": {},
+                            "type": "Object"
+                        }
+                    },
+                    "triggers": {
+                        "When_there_are_messages_in_a_queue": {
+                            "recurrence": {
+                                "frequency": "Second",
+                                "interval": 30
+                            },
+                            "splitOn": "@triggerBody()?['QueueMessagesList']?['QueueMessage']",
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['azurequeues']['connectionId']"
+                                    }
+                                },
+                                "method": "get",
+                                "path": "/@{encodeURIComponent('orders')}/message_trigger"
+                            }
+                        }
+                    },
+                    "actions": {
+                        "Create_CSV_table": {
+                            "runAfter": {
+                                "Parse_JSON": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Table",
+                            "inputs": {
+                                "format": "CSV",
+                                "from": "@body('Parse_JSON')?['Items']"
+                            }
+                        },
+                        "Create_file": {
+                            "runAfter": {
+                                "Create_CSV_table": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "body": "@body('Create_CSV_table')",
+                                "headers": {
+                                    "ReadFileMetadataFromServer": true
+                                },
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['azurefile']['connectionId']"
+                                    }
+                                },
+                                "method": "post",
+                                "path": "/datasets/default/files",
+                                "queries": {
+                                    "folderPath": "/lomostoreorderfiles",
+                                    "name": "@{triggerBody()?['MessageId']}.txt",
+                                    "queryParametersSingleEncoded": true
+                                }
+                            },
+                            "runtimeConfiguration": {
+                                "contentTransfer": {
+                                    "transferMode": "Chunked"
+                                }
+                            }
+                        },
+                        "Delete_message": {
+                            "runAfter": {
+                                "Create_file": [
+                                    "Succeeded"
+                                ],
+                                "OrderFunction": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['azurequeues']['connectionId']"
+                                    }
+                                },
+                                "method": "delete",
+                                "path": "/@{encodeURIComponent('orders')}/messages/@{encodeURIComponent(triggerBody()?['MessageId'])}",
+                                "queries": {
+                                    "popreceipt": "@triggerBody()?['PopReceipt']"
+                                }
+                            }
+                        },
+                        "OrderFunction": {
+                            "runAfter": {
+                                "Parse_JSON": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Function",
+                            "inputs": {
+                                "body": "@body('Parse_JSON')",
+                                "function": {
+                                    "id": "[resourceId('Microsoft.Web/sites/functions', parameters('sites_lomostorefuncapp_name'), 'OrderFunction')]"
+                                },
+                                "method": "POST"
+                            }
+                        },
+                        "Parse_JSON": {
+                            "runAfter": {},
+                            "type": "ParseJson",
+                            "inputs": {
+                                "content": "@triggerBody()?['MessageText']",
+                                "schema": {
+                                    "properties": {
+                                        "Items": {
+                                            "items": {
+                                                "properties": {
+                                                    "Camera": {
+                                                        "type": "string"
+                                                    },
+                                                    "Description": {
+                                                        "type": "string"
+                                                    },
+                                                    "Id": {
+                                                        "type": "string"
+                                                    },
+                                                    "Name": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "Id",
+                                                    "Name",
+                                                    "Camera",
+                                                    "Description"
+                                                ],
+                                                "type": "object"
+                                            },
+                                            "type": "array"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "outputs": {}
+                },
+                "parameters": {
+                    "$connections": {
+                        "value": {
+                            "azurefile": {
+                                "connectionId": "[resourceId('Microsoft.Web/connections', parameters('connections_azurefile_name'))]",
+                                "connectionName": "azurefile",
+                                "id": "[concat('/subscriptions/',variables('subscription_id') ,'/providers/Microsoft.Web/locations/westeurope/managedApis/azurefile')]"
+                            },
+                            "azurequeues": {
+                                "connectionId": "[resourceId('Microsoft.Web/connections', parameters('connections_azurequeues_name'))]",
+                                "connectionName": "azurequeues",
+                                "id": "[concat('/subscriptions/',variables('subscription_id') ,'/providers/Microsoft.Web/locations/westeurope/managedApis/azurequeues')]"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}

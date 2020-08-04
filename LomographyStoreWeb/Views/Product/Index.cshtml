@@ -1,0 +1,19 @@
+@model Newtonsoft.Json.Linq.JArray
+@{
+    ViewData["Title"] = "Products";
+}
+<section id="products" class="section">
+    <div class="container">
+        <h2 class="headline">Photos</h2>
+    </div><!-- container -->
+    <ul class="product-list">
+        @foreach (var item in Model) {
+           <li class="product-item">
+                <a asp-action="detail" asp-route-id="@item["id"]" asp-route-camera="@item["camera"]">
+                    <img class="product-image" src="@item["image"]" alt="@item["name"]">
+                    <h2 class="product-name">@item["name"]</h2>
+                </a>
+            </li>
+        }
+    </ul>
+</section>

@@ -1,0 +1,23 @@
+@model Newtonsoft.Json.Linq.JObject
+
+@{
+    ViewData["Title"] = Model["name"];
+}
+
+<section class="default">
+    <div class="product-detail">
+        <img class="product-image" src="@Model["image"].ToString()" alt="@Model["name"].ToString()" />
+        <div>
+            <label class="product-name">Name:</label>
+            <h2 class="product-name">@Model["name"].ToString()</h2>
+            
+            <p class="product-description">Desciption:</p>
+            <p class="product-description">@Model["description"].ToString()</p>
+
+            <button class="btn-primary pull-right" onclick="addToCart('@Model["id"].ToString()', '@Model["name"].ToString()', 
+            '@Model["camera"].ToString()', '@Model["description"].ToString()' );">Add to cart</button>
+        </div>
+    </div>
+
+    <a asp-action="Index">Back to Products</a>
+</section>

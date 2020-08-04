@@ -1,0 +1,125 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/LomographyStoreApi.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "publish",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "publish",
+                "${workspaceFolder}/LomographyStoreApi.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "watch",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "watch",
+                "run",
+                "${workspaceFolder}/LomographyStoreApi.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "type": "docker-build",
+            "label": "docker-build: debug",
+            "dependsOn": [
+                "build"
+            ],
+            "dockerBuild": {
+                "tag": "lomographystoreapi:dev",
+                "target": "base",
+                "dockerfile": "${workspaceFolder}/Dockerfile",
+                "context": "${workspaceFolder}",
+                "pull": true
+            },
+            "netCore": {
+                "appProject": "${workspaceFolder}/LomographyStoreApi.csproj"
+            }
+        },
+        {
+            "type": "docker-build",
+            "label": "docker-build: release",
+            "dependsOn": [
+                "build"
+            ],
+            "dockerBuild": {
+                "tag": "lomographystoreapi:latest",
+                "dockerfile": "${workspaceFolder}/Dockerfile",
+                "context": "${workspaceFolder}",
+                "pull": true
+            },
+            "netCore": {
+                "appProject": "${workspaceFolder}/LomographyStoreApi.csproj"
+            }
+        },
+        {
+            "type": "docker-run",
+            "label": "docker-run: debug",
+            "dependsOn": [
+                "docker-build: debug"
+            ],
+            "dockerRun": {},
+            "netCore": {
+                "appProject": "${workspaceFolder}/LomographyStoreApi.csproj",
+                "enableDebugging": true
+            }
+        },
+        {
+            "type": "docker-run",
+            "label": "docker-run: release",
+            "dependsOn": [
+                "docker-build: release"
+            ],
+            "dockerRun": {},
+            "netCore": {
+                "appProject": "${workspaceFolder}/LomographyStoreApi.csproj"
+            }
+        },
+        {
+            "label": "clean",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "clean",
+                "${workspaceFolder}",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "publish-release",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "publish",
+                "${workspaceFolder}",
+                "--configuration",
+                "Release",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile",
+            "dependsOn": "clean"
+        }
+    ]
+}

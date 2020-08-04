@@ -1,0 +1,59 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Sport Nutrition</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="~/css/style.css" />
+</head>
+<body>
+    <header id="home" class="header">
+        <nav class="nav" role="navigation">
+            <div class="container nav-elements">
+                <div class="branding">
+                    <a asp-controller="home" asp-action="index"><img src="~/images/logo.png" alt="LomoLife"></a>
+                </div><!-- branding -->
+                <ul class="navbar">
+                    <li><a asp-controller="home" asp-action="index">home</a></li>
+                    <li><a asp-controller="history" asp-action="index">history</a></li>
+                    <li><a asp-controller="product" asp-action="index">photos</a></li>
+                    <li><a asp-controller="home" asp-action="about">about</a></li>
+                    <li><a asp-controller="cart" asp-action="index"><span class="fa fa-shopping-cart" aria-role="button" aria-label="Cart"></span></a></li>
+                </ul><!-- navbar -->
+
+            </div><!-- container nav-elements -->
+        </nav>
+
+    </header><!-- #home -->
+
+    @RenderBody()
+
+    <footer class="footer">
+        <header class="imageheader"></header>
+        <div class="container">
+            <nav class="nav" role="navigation">
+                <div class="container nav-elements">
+                    <div class="branding">
+                        <a asp-controller="home" asp-action="index"><img src="~/images/logo.png" alt="LomoLife"></a>
+                        <p class="address">
+                            Russia, 194044, <br>
+                            Sankt Petersburg,<br>
+                            Chugunnaya str. 20
+                        </p>
+                    </div>
+
+                </div>
+            </nav>
+            <p class="legal">LomoLife is a fictitious brand created solely for the purpose of training. All products and people associated with LomoLife are also fictitious. Any resemblance to real brands, products, or people is purely coincidental. Information provided about the product is also fictitious and should not be construed to be representative of actual products on the market in a similar product category.</p>
+        </div><!-- container -->
+    </footer><!-- footer -->
+
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>
