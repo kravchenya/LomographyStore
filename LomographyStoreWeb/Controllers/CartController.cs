@@ -30,6 +30,7 @@ namespace LomographyStoreWeb.Controllers
         [HttpGet]
         public async Task<IActionResult> History()
         {
+            _logger.LogInformation($"Get order history is called");
             var orderHistory = await _client.GetOderHistory();
             var historyArray = JArray.Parse(orderHistory);
 
@@ -44,6 +45,7 @@ namespace LomographyStoreWeb.Controllers
         [HttpPost]
         public async Task<IActionResult> Index(Order order)
         {
+            _logger.LogInformation($"Place order is called");
             var respone = await _client.PlaceOder(order);
             if(Response.StatusCode == (int)HttpStatusCode.OK)
             {
@@ -51,6 +53,7 @@ namespace LomographyStoreWeb.Controllers
             }
             else
             {
+                _logger.LogError("Error happened during placing new order", Response.StatusCode);
                 throw new ApplicationException($"Order failed with status code: {Response.StatusCode}");
             }
             

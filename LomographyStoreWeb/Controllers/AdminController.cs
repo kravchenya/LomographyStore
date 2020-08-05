@@ -56,7 +56,7 @@ namespace LomographyStoreWeb.Controllers
         /// </summary>
         /// <param name="imageFile">The posted image file</param>
         /// <returns></returns>
-        public async Task<IActionResult> NewImage(IFormFile imageFile)
+        public async Task<IActionResult> AddNewImage(IFormFile imageFile)
         {
             _logger.LogInformation($"Add new photo is called");
 
