@@ -111,7 +111,7 @@ namespace LomographyStoreApi.Controllers
                     return new UnsupportedMediaTypeResult();
                 }
 
-                //BLOB Service: Get blob to write     
+                //BLOB Service: Get blob to write
                 string blobFileRef;
                 using(var imageStream = imageFile.OpenReadStream())
                 {
