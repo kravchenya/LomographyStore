@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using LomographyStoreWeb.Controllers;
 using LomographyStoreWeb.Models;
 using LomographyStoreWeb.Services;
@@ -91,17 +92,17 @@ namespace LomographyStoreWeb.Unittests
         }
 
         [TestMethod]
-        public void AddPhoto_InitializedSuccessfully_ReturnsOkay()
+        public async Task AddPhoto_InitializedSuccessfully_ReturnsOkay()
         {
             // Arrange
             InitHttpClient(HttpStatusCode.OK);
             var adminController = new AdminController(_loggerMock.Object, _httpClientMock.Object);
 
             // Act
-            var result = adminController.AddPhoto(_photoItem);
+            var result = await adminController.AddPhoto(_photoItem);
             
             // Assert
-            var viewResult = result.Result as ViewResult; 
+            var viewResult = result as ViewResult; 
 
             Assert.AreEqual(4, viewResult.ViewData.Count);
             Assert.AreNotEqual(_photoItem, viewResult.ViewData["PhotoModel"]);
@@ -115,17 +116,17 @@ namespace LomographyStoreWeb.Unittests
         }
 
         [TestMethod]
-        public void AddPhoto_InitializedNegatively_ReturnsError()
+        public async Task AddPhoto_InitializedNegatively_ReturnsError()
         {
             // Arrange
             InitHttpClient(HttpStatusCode.BadRequest);
             var adminController = new AdminController(_loggerMock.Object, _httpClientMock.Object);
 
             // Act
-            var result = adminController.AddPhoto(_photoItem);
+            var result = await adminController.AddPhoto(_photoItem);
             
             // Assert
-            var viewResult = result.Result as ViewResult; 
+            var viewResult = result as ViewResult; 
 
             Assert.AreEqual(1, viewResult.ViewData.Count);
             Assert.AreEqual("Error happened while adding photo description", viewResult.ViewData["ErrorMessage"]);
@@ -134,7 +135,7 @@ namespace LomographyStoreWeb.Unittests
         }
 
         [TestMethod]
-        public void AddNewImage_InitializedSuccessfully_ReturnsOkay()
+        public async Task AddNewImage_InitializedSuccessfully_ReturnsOkay()
         {
             // Arrage     
             InitHttpClient(HttpStatusCode.OK);
@@ -147,10 +148,10 @@ namespace LomographyStoreWeb.Unittests
             };
 
             // Act
-            var result = adminController.AddNewImage(_formFileMock.Object);
+            var result = await adminController.AddNewImage(_formFileMock.Object);
 
             // Assert
-            var viewResult = result.Result as ViewResult; 
+            var viewResult = result as ViewResult; 
 
             Assert.AreEqual(1, viewResult.ViewData.Count);
             Assert.AreEqual("Photo added", viewResult.ViewData["ProgressMessage"]);
@@ -159,7 +160,7 @@ namespace LomographyStoreWeb.Unittests
         }
 
         [TestMethod]
-        public void AddNewImage_WhenHttpResponseNegative_ReturnsError()
+        public async Task AddNewImage_WhenHttpResponseNegative_ReturnsError()
         {
             // Arrage           
             InitHttpClient(HttpStatusCode.BadGateway);
@@ -172,10 +173,10 @@ namespace LomographyStoreWeb.Unittests
             };
 
             // Act
-            var result = adminController.AddNewImage(_formFileMock.Object);
+            var result = await adminController.AddNewImage(_formFileMock.Object);
 
             // Assert
-            var viewResult = result.Result as ViewResult; 
+            var viewResult = result as ViewResult; 
 
             Assert.AreEqual(1, viewResult.ViewData.Count);
             Assert.AreEqual("Error happened while adding new image", viewResult.ViewData["ErrorMessage"]);
@@ -184,7 +185,7 @@ namespace LomographyStoreWeb.Unittests
         }
 
         [TestMethod]
-        public void AddNewImage_InitializedNegatively_ReturnsError()
+        public async Task AddNewImage_InitializedNegatively_ReturnsError()
         {
             // Arrage 
             InitHttpClient(HttpStatusCode.BadGateway);
@@ -198,10 +199,10 @@ namespace LomographyStoreWeb.Unittests
             var iformFile = new Mock<IFormFile>();
 
             // Act
-            var result = adminController.AddNewImage(iformFile.Object);
+            var result = await adminController.AddNewImage(iformFile.Object);
 
             // Assert
-            var viewResult = result.Result as ViewResult; 
+            var viewResult = result as ViewResult; 
 
             Assert.AreEqual(1, viewResult.ViewData.Count);
             Assert.AreEqual("image can not be null", viewResult.ViewData["ErrorMessage"]);

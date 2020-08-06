@@ -56,7 +56,6 @@ namespace LomographyStoreWeb.Controllers
                 _logger.LogError("Error happened during placing new order", Response.StatusCode);
                 throw new ApplicationException($"Order failed with status code: {Response.StatusCode}");
             }
-            
         }
 
         /// <summary>

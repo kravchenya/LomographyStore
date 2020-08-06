@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using LomographyStoreWeb.Controllers;
 using LomographyStoreWeb.Models;
 using LomographyStoreWeb.Services;
@@ -46,16 +47,16 @@ namespace LomographyStoreWeb.Unittests
         }
 
         [TestMethod]
-        public void Index_InitializedSuccessfully_ReturnsOkay()
+        public async Task Index_InitializedSuccessfully_ReturnsOkay()
         {
             // Arrange
             var productController = new ProductController(_loggerMock.Object, _httpClientMock.Object);
             
             // Act
-            var result = productController.Index();
+            var result = await productController.Index();
 
             // Assert
-            var viewResult = result.Result as ViewResult; 
+            var viewResult = result as ViewResult; 
             var photosAsJson = viewResult.Model as Newtonsoft.Json.Linq.JArray;
 
             Assert.AreEqual(2, photosAsJson.Count);
@@ -64,16 +65,16 @@ namespace LomographyStoreWeb.Unittests
         }
 
         [TestMethod]
-        public void Detail_InitializedSuccessfully_ReturnsOkay()
+        public async Task Detail_InitializedSuccessfully_ReturnsOkay()
         {
              // Arrange
             var productController = new ProductController(_loggerMock.Object, _httpClientMock.Object);
             
             // Act
-            var result = productController.Detail(_photos[0].Id, _photos[0].Camera);
+            var result = await productController.Detail(_photos[0].Id, _photos[0].Camera);
 
             // Assert
-            var viewResult = result.Result as ViewResult; 
+            var viewResult = result as ViewResult; 
             var photosAsJson = viewResult.Model as Newtonsoft.Json.Linq.JObject;
 
             Assert.AreEqual(_photos[0].Id, photosAsJson.First.First.ToString());

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using LomographyStoreWeb.Controllers;
 using LomographyStoreWeb.Models;
 using LomographyStoreWeb.Services;
@@ -77,16 +78,16 @@ namespace LomographyStoreWeb.Unittests
         }
 
         [TestMethod]
-        public void History_InitializedSuccessfully_ReturnsOkay()
+        public async Task History_InitializedSuccessfully_ReturnsOkay()
         {
              // Arrange
             var productController = new CartController(_loggerMock.Object, _httpClientMock.Object);
             
             // Act
-            var result = productController.History();
+            var result = await productController.History();
 
             // Assert
-            var viewResult = result.Result as ViewResult;
+            var viewResult = result as ViewResult;
             var history = viewResult.Model as Newtonsoft.Json.Linq.JArray; 
             Assert.AreEqual(2, history.Count);
             Assert.AreEqual(_id1, history[0].First.First.ToString());
@@ -94,7 +95,7 @@ namespace LomographyStoreWeb.Unittests
         }
         
         [TestMethod]
-        public void Index_InitializedSuccessfully_ReturnsOkay()
+        public  async Task Index_InitializedSuccessfully_ReturnsOkay()
         {
             // Arrange
             _httpResponceMock.Setup(x => x.StatusCode).Returns((int)HttpStatusCode.OK);
@@ -103,15 +104,15 @@ namespace LomographyStoreWeb.Unittests
             };
             
             // Act
-            var result = cartController.Index(_order);
+            var result = await cartController.Index(_order);
 
             // Assert
-            var okResult = result.Result as OkResult;
+            var okResult = result as OkResult;
             Assert.AreEqual(200, okResult.StatusCode);
         }
 
         [TestMethod]
-        public void Index_BadResponse_ThrowsException()
+        public async Task Index_BadResponse_ThrowsException()
         {
             // Arrange
             _httpResponceMock.Setup(x => x.StatusCode).Returns((int)HttpStatusCode.BadRequest);
@@ -119,9 +120,11 @@ namespace LomographyStoreWeb.Unittests
                 ControllerContext = _controllerContext
             };
             
-            var result = cartController.Index(_order);
+            // Act
+            var exp = await Assert.ThrowsExceptionAsync<ApplicationException>(() => cartController.Index(_order));
 
-            Assert.AreEqual("Order failed with status code: 400", result.Exception.InnerException.Message);
+            // Assert
+            Assert.AreEqual("Order failed with status code: 400", exp.Message);
         }
     }
 }
