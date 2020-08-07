@@ -1,0 +1,204 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workflows_LomographyStoreLogic_name": {
+            "defaultValue": "lomographystorelogic",
+            "type": "String"
+        },
+        "functionapp_name": {
+            "defaultValue": "lomostorefuncapp",
+            "type": "String"
+        },
+        "queue_name": {
+            "defaultValue": "azurequeues",
+            "type": "String"
+        },
+        "file_name": {
+            "defaultValue": "azurefile",
+            "type": "String"
+        }
+    },
+   "variables": {
+		"subscription_id": "[subscription().subscriptionId]"
+	},
+    "resources": [
+        {
+            "type": "Microsoft.Logic/workflows",
+            "apiVersion": "2017-07-01",
+            "name": "[parameters('workflows_LomographyStoreLogic_name')]",
+            "location": "westeurope",
+            "properties": {
+                "state": "Disabled",
+                "definition": {
+                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "$connections": {
+                            "defaultValue": {},
+                            "type": "Object"
+                        }
+                    },
+                    "triggers": {
+                        "When_there_are_messages_in_a_queue": {
+                            "recurrence": {
+                                "frequency": "Second",
+                                "interval": 30
+                            },
+                            "splitOn": "@triggerBody()?['QueueMessagesList']?['QueueMessage']",
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['azurequeues']['connectionId']"
+                                    }
+                                },
+                                "method": "get",
+                                "path": "/@{encodeURIComponent('orders')}/message_trigger"
+                            }
+                        }
+                    },
+                    "actions": {
+                        "Create_CSV_table": {
+                            "runAfter": {
+                                "Parse_JSON": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Table",
+                            "inputs": {
+                                "format": "CSV",
+                                "from": "@body('Parse_JSON')?['Items']"
+                            }
+                        },
+                        "Create_file": {
+                            "runAfter": {
+                                "Create_CSV_table": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "body": "@body('Create_CSV_table')",
+                                "headers": {
+                                    "ReadFileMetadataFromServer": true
+                                },
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['azurefile']['connectionId']"
+                                    }
+                                },
+                                "method": "post",
+                                "path": "/datasets/default/files",
+                                "queries": {
+                                    "folderPath": "/lomostoreorderfiles",
+                                    "name": "@{triggerBody()?['MessageId']}.txt",
+                                    "queryParametersSingleEncoded": true
+                                }
+                            },
+                            "runtimeConfiguration": {
+                                "contentTransfer": {
+                                    "transferMode": "Chunked"
+                                }
+                            }
+                        },
+                        "Delete_message": {
+                            "runAfter": {
+                                "Create_file": [
+                                    "Succeeded"
+                                ],
+                                "OrderFunction": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['azurequeues']['connectionId']"
+                                    }
+                                },
+                                "method": "delete",
+                                "path": "/@{encodeURIComponent('orders')}/messages/@{encodeURIComponent(triggerBody()?['MessageId'])}",
+                                "queries": {
+                                    "popreceipt": "@triggerBody()?['PopReceipt']"
+                                }
+                            }
+                        },
+                        "OrderFunction": {
+                            "runAfter": {
+                                "Parse_JSON": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Function",
+                            "inputs": {
+                                "body": "@body('Parse_JSON')",
+                                "function": {
+                                     "id": "[concat(resourceGroup().Id, '/providers/Microsoft.Web/sites/',  parameters('functionapp_name'), '/functions/OrderFunction' )]"
+                                },
+                                "method": "POST"
+                            }
+                        },
+                        "Parse_JSON": {
+                            "runAfter": {},
+                            "type": "ParseJson",
+                            "inputs": {
+                                "content": "@triggerBody()?['MessageText']",
+                                "schema": {
+                                    "properties": {
+                                        "Items": {
+                                            "items": {
+                                                "properties": {
+                                                    "Camera": {
+                                                        "type": "string"
+                                                    },
+                                                    "Description": {
+                                                        "type": "string"
+                                                    },
+                                                    "Id": {
+                                                        "type": "string"
+                                                    },
+                                                    "Name": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "Id",
+                                                    "Name",
+                                                    "Camera",
+                                                    "Description"
+                                                ],
+                                                "type": "object"
+                                            },
+                                            "type": "array"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "outputs": {}
+                },
+                "parameters": {
+                    "$connections": {
+                        "value": {
+                            "azurefile": {
+                                "connectionId": "[concat(resourceGroup().id, '/providers/Microsoft.Web/connections/', parameters('file_name'))]",
+                                "connectionName": "[parameters('file_name')]",
+                                "id": "[concat('/subscriptions/', variables('subscription_id'), '/providers/Microsoft.Web/locations/westeurope/managedApis/', parameters('file_name'))]"
+
+                            },
+                            "azurequeues": {
+                                "connectionId": "[concat(resourceGroup().id, '/providers/Microsoft.Web/connections/', parameters('queue_name'))]",
+                                "connectionName": "[parameters('queue_name')]",
+                                "id": "[concat('/subscriptions/', variables('subscription_id'), '/providers/Microsoft.Web/locations/westeurope/managedApis/', parameters('queue_name'))]"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}
