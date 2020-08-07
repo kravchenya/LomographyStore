@@ -59,7 +59,7 @@
             "type": "String"
         },
         "dockerimage_lomostorefuncapp": {
-            "defaultValue": "lomographystoreapi",
+            "defaultValue": "lomographystorefuncs",
             "type": "String"
         },
         "dockerimage_lomostoreweb": {
