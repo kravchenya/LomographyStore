@@ -1,3 +1,5 @@
-# LomographyStore
+# .NET Sample Reference Application
 
-content will come soon
+Sample .NET Core native Azure cloud reference application.
+
+### Architecture overview
