@@ -3,3 +3,5 @@
 Sample .NET Core native Azure cloud reference application.
 
 ### Architecture overview
+
+![](Images/Architecture_overview.svg)
