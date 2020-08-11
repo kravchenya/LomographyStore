@@ -187,13 +187,13 @@
                             "azurefile": {
                                 "connectionId": "[concat(resourceGroup().id, '/providers/Microsoft.Web/connections/', parameters('file_name'))]",
                                 "connectionName": "[parameters('file_name')]",
-                                "id": "[concat('/subscriptions/', variables('subscription_id'), '/providers/Microsoft.Web/locations/westeurope/managedApis/', parameters('file_name'))]"
+                                "id": "[concat('/subscriptions/', variables('subscription_id'), '/providers/Microsoft.Web/locations/westeurope/managedApis/azurefile')]"
 
                             },
                             "azurequeues": {
                                 "connectionId": "[concat(resourceGroup().id, '/providers/Microsoft.Web/connections/', parameters('queue_name'))]",
                                 "connectionName": "[parameters('queue_name')]",
-                                "id": "[concat('/subscriptions/', variables('subscription_id'), '/providers/Microsoft.Web/locations/westeurope/managedApis/', parameters('queue_name'))]"
+                                "id": "[concat('/subscriptions/', variables('subscription_id'), '/providers/Microsoft.Web/locations/westeurope/managedApis/azurequeues')]"
                             }
                         }
                     }

@@ -225,9 +225,13 @@
             "location": "westeurope",
             "properties": {
                 "displayName": "lomostorefile",
+                "parameterValues": {
+                    "accountName": "[parameters('storageAccounts_lomostorestorageaccount_name')]",
+                    "accessKey": "[listKeys(variables('storageAccounts_lomostorestorageaccount_id'), '2019-04-01').keys[0].value]"
+                },
                 "customParameterValues": {},
                 "api": {
-                    "id": "[concat('/subscriptions/',variables('subscription_id') ,'/providers/Microsoft.Web/locations/westeurope/managedApis/', parameters('connections_azurefile_name'))]"
+                    "id": "[concat('/subscriptions/', variables('subscription_id'), '/providers/Microsoft.Web/locations/westeurope/managedApis/', parameters('connections_azurefile_name'))]"
                 }
             }
         },
@@ -238,9 +242,13 @@
             "location": "westeurope",
             "properties": {
                 "displayName": "lomostorestorage",
+                "parameterValues": {
+                    "storageAccount": "[parameters('storageAccounts_lomostorestorageaccount_name')]",
+                    "sharedKey": "[listKeys(variables('storageAccounts_lomostorestorageaccount_id'), '2019-04-01').keys[0].value]"
+                },
                 "customParameterValues": {},
                 "api": {
-                    "id": "[concat('/subscriptions/',variables('subscription_id') ,'/providers/Microsoft.Web/locations/westeurope/managedApis/', parameters('connections_azurequeues_name'))]"
+                    "id": "[concat('/subscriptions/', variables('subscription_id'), '/providers/Microsoft.Web/locations/westeurope/managedApis/', parameters('connections_azurequeues_name'))]"
                 }
             }
         },
