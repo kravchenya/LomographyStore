@@ -8,4 +8,4 @@ Sample .NET Core native Azure cloud reference application.
 
 ### ARM Template
 
-![](Images/Architecture_overview.svg)
+![](Images/Container_Registry.svg)
