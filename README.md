@@ -30,6 +30,6 @@ After all steps are done, you will get a turnkey application with configured env
 ### Notes
 
 This project was created bases on a [course](https://www.linkedin.com/learning/building-a-web-application-on-microsoft-azure) by  Matt Milner on LinkedIn Learning.
-In addition to the course I refactored the code, wrote unit tests, introduced docker containers and added their support in ARM templates
+In addition to the course I refactored the code, wrote unit tests, introduced docker containers and added their support to ARM templates
 
 
