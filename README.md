@@ -1,6 +1,6 @@
 # .NET Sample Reference Application
 
-A sample .NET Core native Azure cloud application which demonstrates abilities of such Azure services as Azure Web Sites, Azure Logic App, Azure Function, Azure Storage, Azure Cosmos DB, Azure Resource Manager (PaaS and SaaS) and Azure Container Registry.
+An ASP.NET Core native Azure cloud application which demonstrates abilities of such Azure services as Azure Web Sites, Azure Logic App, Azure Function, Azure Storage, Azure Cosmos DB, Azure Resource Manager (PaaS and SaaS) and Azure Container Registry.
 
 ## Architecture overview
 
