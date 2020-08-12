@@ -10,7 +10,7 @@ Sample .NET Core native Azure cloud reference application.
 
 ![](Images/Container_Registry.svg)
 
-### Getting Started
+## Getting Started with ARM template
 
 In order to use ARM Template one would need to do the following
 
